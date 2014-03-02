@@ -73,6 +73,8 @@ using namespace std;
 #define TRIM_PITCH 0
 #define THRUST_CONSTANT 38500
 #define HOVER_THRUST_LEVEL 32767
+#define ROLL_CONSTANT 3.5
+#define PITCH_CONSTANT 3.5
 
 //CS50_TODO:  define other variables here
 //Such as: current states, current thrust
@@ -97,11 +99,24 @@ CCrazyflie *cflieCopter=NULL;
 //The helper functions 
 void flyNormal(CCrazyflie *cflieCopter){
     setThrust(cflieCopter,current_thrust);
+    setRoll(cflieCopter, current_roll);
+    setPitch(cflieCopter, current_pitch);
 }
 
 void flyHover(CCrazyflie *cflieCopter) {
   current_thrust = HOVER_THRUST_LEVEL;
   setThrust(cflieCopter, current_thrust);
+  setRoll(cflieCopter, current_roll);
+  setPitch(cflieCopter, current_pitch);
+}
+
+void flyLand(CCrazyflie *cflieCopter) {
+  current_thrust = LAND_THRUST_LEVEL;
+  current_roll = 0.0;
+  current_pitch = 0.0;
+  setThrust(cflieCopter, current_thrust);
+  setRoll(cflieCopter, current_roll);
+  setPitch(cflieCopter, current_pitch);
 }
 
 void changeCurrentThrust(float handPos) {
@@ -109,12 +124,14 @@ void changeCurrentThrust(float handPos) {
 
 }
 
-void changeRoll(CCrazyflie *cflieCopter) {
-  setRoll(cflieCopter, current_roll);
+//passed int will be -1/0/1 to set roll direction
+void changeRoll(int num) {
+  current_roll = ROLL_CONSTANT*num;
 }
 
-void changePitch(CCrazyflie *cflieCopter) {
-  setPitch(cflieCopter, current_pitch);
+//passed int will be -1/0/1 to set pitch direction
+void changePitch(int num) {
+ current_pitch = PITCH_CONSTANT*num;
 }
 
 //The leap motion call back functions
@@ -210,14 +227,14 @@ void* main_control(void * param){
         //CS50_TODO : depend on the current signal and current state, you can call the helper function here to control the copter
 
     //MJA
-   /* switch(current_signal) {
+    switch(current_signal) {
 
       case NORMAL_STATE: {
-
+        flyNormal(cflieCopter);
       } break;
 
       case HOVER_STATE: {
-
+        flyHover(cflieCopter);
       } break;
 
       case PRE_NORMAL_STATE: {
@@ -231,9 +248,9 @@ void* main_control(void * param){
       case LAND_STATE: {
 
       } break;
-    }*/
+    }
  
-//******** FRIDAY RUN CODE ****************
+/*/******** FRIDAY RUN CODE ****************
     if(i<400)
         setThrust(cflieCopter, 40000);
       else if(i>=400 && i<800)
@@ -242,7 +259,7 @@ void* main_control(void * param){
         setThrust(cflieCopter, 0);
 
       i++;
-//******** END FRIDAY RUN CODE ************
+//******** END FRIDAY RUN CODE ************/
         
   }
   printf("%s\n", "exit");
