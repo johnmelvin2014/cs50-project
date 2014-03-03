@@ -73,8 +73,9 @@ using namespace std;
 #define TRIM_PITCH 0
 #define THRUST_CONSTANT 38500
 #define HOVER_THRUST_LEVEL 32767
-#define ROLL_CONSTANT 3.5
-#define PITCH_CONSTANT 3.5
+#define LAND_THRUST_CONST 50
+#define ROLL_CONSTANT 10.0
+#define PITCH_CONSTANT 10.0
 
 //CS50_TODO:  define other variables here
 //Such as: current states, current thrust
@@ -111,7 +112,7 @@ void flyHover(CCrazyflie *cflieCopter) {
 }
 
 void flyLand(CCrazyflie *cflieCopter) {
-  current_thrust = LAND_THRUST_LEVEL;
+  current_thrust -= 10.0;
   current_roll = 0.0;
   current_pitch = 0.0;
   setThrust(cflieCopter, current_thrust);
@@ -136,29 +137,24 @@ void changePitch(int num) {
 
 //The leap motion call back functions
 //Leap motion functions
-void on_init(leap_controller_ref controller, void *user_info)
-{
+void on_init(leap_controller_ref controller, void *user_info) {
     printf("init\n");
 }
 
-void on_connect(leap_controller_ref controller, void *user_info)
-{
+void on_connect(leap_controller_ref controller, void *user_info) {
     printf("connect\n");
 }
 
-void on_disconnect(leap_controller_ref controller, void *user_info)
-{
+void on_disconnect(leap_controller_ref controller, void *user_info) {
     printf("disconnect\n");
 }
 
-void on_exit(leap_controller_ref controller, void *user_info)
-{
+void on_exit(leap_controller_ref controller, void *user_info) {
     printf("exit\n");
 }
 
 //This function will be called when leapmotion detect hand gesture, 
-void on_frame(leap_controller_ref controller, void *user_info)
-{
+void on_frame(leap_controller_ref controller, void *user_info) {
   leap_frame_ref frame = leap_controller_copy_frame(controller, 0);
        
     for (int i = 0; i < leap_frame_hands_count(frame); i++) {
@@ -198,10 +194,8 @@ void on_frame(leap_controller_ref controller, void *user_info)
         //*pseudocode* 
     }
     leap_frame_release(frame);
-  }
+}
     
-
-
 //This the leap motion control callback function
 //You don't have to modifiy this
 void* leap_thread(void * param){
@@ -221,6 +215,8 @@ void* leap_thread(void * param){
 void* main_control(void * param){
   CCrazyflie *cflieCopter=(CCrazyflie *)param;
   int i = 0;
+
+  current_signal = LAND_STATE;
 
   while(cycle(cflieCopter)) {
         //transition depend on the current state
@@ -246,20 +242,28 @@ void* main_control(void * param){
       } break;
 
       case LAND_STATE: {
-
+        flyLand(cflieCopter);
       } break;
     }
  
-/*/******** FRIDAY RUN CODE ****************
-    if(i<400)
-        setThrust(cflieCopter, 40000);
-      else if(i>=400 && i<800)
-        setThrust(cflieCopter, 32000);
-      else
-        setThrust(cflieCopter, 0);
+  /*/******** FRIDAY RUN CODE ****************
+      if(i<700){
+          setThrust(cflieCopter, 40000);
+          setPitch(cflieCopter, 30);
+        }
+        else if(i>=700 && i<2000){
+          if(i == 1000)
+            setHoverPoint(cflieCopter, 1); 
 
-      i++;
-//******** END FRIDAY RUN CODE ************/
+          //setThrust(cflieCopter, HOVER_THRUST_LEVEL);
+          //setPitch(cflieCopter, 0);
+          
+        }
+        else{
+          setThrust(cflieCopter, 0);
+
+        i++;
+  //******** END FRIDAY RUN CODE ************/
         
   }
   printf("%s\n", "exit");
