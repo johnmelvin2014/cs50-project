@@ -82,7 +82,7 @@ using namespace std;
 //variable for state and signals
 int current_signal;
 
-float current_thrust;
+float current_thrust = 30000;
 
 float current_pitch;
 
@@ -112,7 +112,7 @@ void flyHover(CCrazyflie *cflieCopter) {
 }
 
 void flyLand(CCrazyflie *cflieCopter) {
-  current_thrust -= 10.0;
+  current_thrust -= (current_thrust>10000)?20:0;
   current_roll = 0.0;
   current_pitch = 0.0;
   setThrust(cflieCopter, current_thrust);
@@ -216,12 +216,11 @@ void* main_control(void * param){
   CCrazyflie *cflieCopter=(CCrazyflie *)param;
   int i = 0;
 
-  current_signal = LAND_STATE;
-
+  printf("\n\n");
   while(cycle(cflieCopter)) {
         //transition depend on the current state
-        //CS50_TODO : depend on the current signal and current state, you can call the helper function here to control the copter
-
+ /*       //CS50_TODO : depend on the current signal and current state, you can call the helper function here to control the copter
+    current_signal = NORMAL_STATE;
     //MJA
     switch(current_signal) {
 
@@ -234,36 +233,48 @@ void* main_control(void * param){
       } break;
 
       case PRE_NORMAL_STATE: {
-
+        if(hoverPoint(cflieCopter) != 0)
+          setHoverPoint(cflieCopter, 0);
+      //  if(/*TIME OUT SIGNAL)
+      //    current_signal = NORMAL_STATE;
       } break;
 
       case PRE_HOVER_STATE: {
-
+        if(hoverPoint(cflieCopter) != 1)
+          setHoverPoint(cflieCopter, 1);
+      //  if(/*TIME OUT SIGNAL)
+      //    current_signal = HOVER_STATE;
       } break;
 
       case LAND_STATE: {
         flyLand(cflieCopter);
       } break;
     }
- 
-  /*/******** FRIDAY RUN CODE ****************
+  
+  printf("Id=%d, Stabilizer: Roll=%f, Pitch=%f, Thrust=%f\r",
+        31, rollValue(cflieCopter), pitchValue(cflieCopter), current_thrust);
+  
+
+  current_thrust=35700+pos.y*factor;
+factor=52-4*batteryLevel(cflieCopter);*/
+  //   ******** TEST CODE ****************
       if(i<700){
-          setThrust(cflieCopter, 40000);
+          setThrust(cflieCopter, 39000);
           setPitch(cflieCopter, 30);
         }
         else if(i>=700 && i<2000){
-          if(i == 1000)
+          if(i == 1000) 
             setHoverPoint(cflieCopter, 1); 
-
-          //setThrust(cflieCopter, HOVER_THRUST_LEVEL);
-          //setPitch(cflieCopter, 0);
           
+          setThrust(cflieCopter, HOVER_THRUST_LEVEL);
+          setPitch(cflieCopter, 0);
         }
         else{
           setThrust(cflieCopter, 0);
+        }
 
         i++;
-  //******** END FRIDAY RUN CODE ************/
+  // ******** END TEST CODE ************/
         
   }
   printf("%s\n", "exit");
