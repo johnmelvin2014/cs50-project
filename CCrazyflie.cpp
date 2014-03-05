@@ -102,11 +102,13 @@ bool sendParam(CCrazyflie* crFile,int8_t althold) {
   int nSize = sizeof(unsigned char) + sizeof(int8_t);
   char cBuffer[nSize];
   memcpy(&cBuffer[0 * sizeof(unsigned char)], &varid, sizeof(unsigned char));
-  memcpy(& cBuffer[1 * sizeof(int8_t)], &althold, sizeof(int8_t));
+  memcpy(& cBuffer[1 * sizeof(unsigned char)], &althold, sizeof(int8_t));
+
 
   CCRTPPacket *crtpPacket = new CCRTPPacket;
   CCRTPPacketInit3(crtpPacket, cBuffer, nSize, 2);
-
+  setChannel(crtpPacket, 2);
+  
   CCRTPPacket *crtpReceived = sendPacket(crFile->m_crRadio, crtpPacket);
     
   delete crtpPacket;
@@ -143,7 +145,6 @@ bool sendSetpoint(CCrazyflie* crFile,float fRoll, float fPitch, float fYaw, shor
   }
 }
 
-
 //The main interface of setting
 void setThrust(CCrazyflie* crFile,int nThrust) {
   crFile->m_nThrust = nThrust;
@@ -152,6 +153,10 @@ void setThrust(CCrazyflie* crFile,int nThrust) {
   } else if(crFile->m_nThrust > crFile->m_nMaxThrust) {
     crFile->m_nThrust = crFile->m_nMaxThrust;
   }
+}
+
+float getThrust(CCrazyflie* crFile) {
+  return crFile->m_nThrust;
 }
 
 //cycle through each state
@@ -208,10 +213,8 @@ bool cycle(CCrazyflie* crFile) {
         */
     //*pseudocode* 
     //MJA
-    if(crFile->m_setHoverPoint)
-      sendParam(crFile, 1);
-    else
-      sendParam(crFile, 0);
+    
+     sendParam(crFile, crFile->m_setHoverPoint);
 
 	   sendSetpoint(crFile,crFile->m_fRoll, crFile->m_fPitch, crFile->m_fYaw, crFile->m_nThrust);
 	}

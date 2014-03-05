@@ -247,6 +247,8 @@ typedef struct _CCrazyflie {
   bool sendParam(CCrazyflie* crFile,int8_t althold);
 
 //MJA
+  float getThrust(CCrazyflie* crFile);
+
   void setHoverPoint(CCrazyflie* crFile, bool HoverPoint);
 
   bool hoverPoint(CCrazyflie* crFile);
